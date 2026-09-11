@@ -1,0 +1,842 @@
+<title>Migration Atlas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#EEF0EA; --surface:#FFFFFF; --surface-2:#E3E8DD;
+    --ink:#1B231E; --ink-muted:#57635A;
+    --line:#D2D9C9; --line-strong:#B7C0AE;
+    --route:#1F6F63; --route-contrast:#FFFFFF; --route-soft:#DCEBE6;
+    --flag:#B5622A; --flag-soft:#F3E3D3;
+    --danger:#A23B2E; --danger-soft:#F5DFDA;
+    --shadow: 0 1px 2px rgba(27,35,30,.07), 0 6px 18px rgba(27,35,30,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10161A; --surface:#161D22; --surface-2:#1C262C;
+      --ink:#E7EDE9; --ink-muted:#93A29B;
+      --line:#28323A; --line-strong:#3A464D;
+      --route:#59C2AE; --route-contrast:#0B211D; --route-soft:#16302B;
+      --flag:#E2915B; --flag-soft:#33221A;
+      --danger:#E2735F; --danger-soft:#3A1E19;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10161A; --surface:#161D22; --surface-2:#1C262C;
+    --ink:#E7EDE9; --ink-muted:#93A29B;
+    --line:#28323A; --line-strong:#3A464D;
+    --route:#59C2AE; --route-contrast:#0B211D; --route-soft:#16302B;
+    --flag:#E2915B; --flag-soft:#33221A;
+    --danger:#E2735F; --danger-soft:#3A1E19;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.45);
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Public Sans', system-ui, -apple-system, sans-serif;
+    font-size:16px; line-height:1.6;
+  }
+  h1,h2,h3,h4{ font-family:'Spectral', Georgia, serif; font-weight:600; text-wrap:balance; color:var(--ink); margin:0; }
+  code, .mono, .pill, .rc-id, td.num, th.num, .win{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+  a{ color:var(--route); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  :focus-visible{ outline:2px solid var(--route); outline-offset:2px; border-radius:3px; }
+  p{ max-width:70ch; }
+  p + p{ margin-top:10px; }
+
+  .shell{ display:flex; max-width:1300px; margin:0 auto; padding-inline:20px; align-items:flex-start; }
+
+  nav.rail{
+    width:236px; flex:none; position:sticky; top:0; align-self:flex-start;
+    max-height:100vh; overflow-y:auto; padding:30px 14px 30px 4px;
+  }
+  nav.rail .brand{ font-family:'Spectral',serif; font-weight:700; font-size:1.08rem; }
+  nav.rail .brand-sub{ display:block; font-size:.72rem; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.09em; margin:4px 0 22px; }
+  nav.rail ol{ list-style:none; margin:0; padding:0 0 0 20px; position:relative; }
+  nav.rail ol::before{ content:''; position:absolute; left:4px; top:8px; bottom:8px; width:2px; background:var(--line-strong); }
+  nav.rail li + li{ margin-top:2px; }
+  nav.rail a{
+    position:relative; display:block; color:var(--ink-muted); font-size:.86rem; font-weight:500;
+    padding:7px 8px 7px 14px; border-radius:6px;
+  }
+  nav.rail a::before{
+    content:''; position:absolute; left:-19px; top:50%; transform:translateY(-50%);
+    width:9px; height:9px; border-radius:50%; background:var(--surface); border:2px solid var(--line-strong);
+  }
+  nav.rail a:hover{ background:var(--surface-2); color:var(--ink); text-decoration:none; }
+  nav.rail a.active{ background:var(--route-soft); color:var(--ink); font-weight:600; }
+  nav.rail a.active::before{ background:var(--route); border-color:var(--route); box-shadow:0 0 0 4px var(--route-soft); }
+
+  main{ flex:1; min-width:0; padding:30px 6px 90px 42px; border-left:1px solid var(--line); }
+
+  .masthead{ padding-bottom:26px; border-bottom:1px solid var(--line); margin-bottom:40px; }
+  .eyebrow{ font-size:.74rem; text-transform:uppercase; letter-spacing:.12em; color:var(--route); font-weight:700; margin-bottom:10px; }
+  h1.title{ font-size:2.25rem; line-height:1.12; margin:0 0 10px; }
+  .subtitle{ color:var(--ink-muted); font-size:1.02rem; max-width:640px; margin:0 0 18px; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:8px; }
+
+  .pill{ display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink-muted); padding:4px 10px; border-radius:999px; font-size:.74rem; font-weight:500; }
+  .pill.route{ background:var(--route-soft); color:var(--route); border-color:transparent; }
+  .pill.flag{ background:var(--flag-soft); color:var(--flag); border-color:transparent; }
+
+  section{ margin-bottom:66px; scroll-margin-top:20px; }
+  section .sec-label{ font-size:.74rem; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-muted); font-weight:700; margin-bottom:8px; }
+  section h2{ font-size:1.6rem; margin-bottom:14px; }
+  section h3{ font-size:1.14rem; margin:30px 0 12px; }
+  section > p.lead{ max-width:66ch; color:var(--ink-muted); font-size:1.02rem; margin-bottom:22px; }
+
+  .callout{ border:1px solid var(--line-strong); border-left:3px solid var(--route); background:var(--surface); border-radius:8px; padding:16px 18px; margin:18px 0; box-shadow:var(--shadow); max-width:70ch; }
+  .callout.flag{ border-left-color:var(--flag); }
+  .callout .callout-label{ display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; color:var(--route); margin-bottom:6px; }
+  .callout.flag .callout-label{ color:var(--flag); }
+  .callout p{ margin:0; font-size:.93rem; color:var(--ink-muted); }
+
+  .table-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  table{ width:100%; border-collapse:collapse; background:var(--surface); font-size:.89rem; min-width:560px; }
+  thead th{ text-align:left; background:var(--surface-2); color:var(--ink-muted); font-size:.71rem; text-transform:uppercase; letter-spacing:.06em; padding:10px 14px; border-bottom:1px solid var(--line); font-weight:700; white-space:nowrap; }
+  tbody td{ padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--surface-2); }
+  td .t-strong{ font-weight:600; color:var(--ink); }
+  td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  td.center{ text-align:center; }
+
+  .raci{ display:inline-flex; width:24px; height:24px; border-radius:6px; align-items:center; justify-content:center; font-weight:700; font-size:.72rem; }
+  .raci.R{ background:var(--route-soft); color:var(--route); }
+  .raci.A{ background:var(--flag-soft); color:var(--flag); }
+  .raci.C{ background:var(--surface-2); color:var(--ink-muted); border:1px solid var(--line); }
+  .raci.I{ background:transparent; color:var(--ink-muted); border:1px dashed var(--line-strong); }
+
+  /* route timeline (methodology phases) */
+  .route-line{ position:relative; }
+  .leg{ display:grid; grid-template-columns:52px 1fr; gap:18px; }
+  .leg-rail{ display:flex; flex-direction:column; align-items:center; }
+  .leg-num{ width:38px; height:38px; border-radius:50%; background:var(--surface); border:2px solid var(--route); color:var(--route); font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:.82rem; display:flex; align-items:center; justify-content:center; flex:none; z-index:1; }
+  .leg-track{ width:2px; flex:1; background:var(--line-strong); margin-top:4px; }
+  .leg:last-child .leg-track{ display:none; }
+  .leg-body{ padding-bottom:34px; }
+  .leg-body h3{ margin:2px 0 4px; font-size:1.14rem; }
+  .leg-win{ color:var(--ink-muted); font-size:.8rem; margin-bottom:12px; display:block; }
+  .leg-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px; }
+  @media (max-width:640px){ .leg-grid{ grid-template-columns:1fr; } }
+  .leg-col h4{ font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-muted); margin:0 0 8px; font-weight:700; }
+  .leg-col ul{ margin:0; padding-left:18px; font-size:.89rem; }
+  .leg-col li{ margin-bottom:6px; }
+  .leg-col li::marker{ color:var(--route); }
+
+  /* 7R cards */
+  .r-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
+  .r-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; box-shadow:var(--shadow); }
+  .r-card .r-code{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:.78rem; color:var(--route); display:block; margin-bottom:6px; letter-spacing:.03em; }
+  .r-card h4{ margin:0 0 6px; font-size:1rem; }
+  .r-card p{ font-size:.85rem; color:var(--ink-muted); margin:0; max-width:none; }
+  .r-card .r-tool{ margin-top:10px; font-size:.75rem; color:var(--flag); font-weight:600; }
+
+  /* LLD accordions */
+  details.lld{ background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); margin-bottom:12px; overflow:hidden; }
+  details.lld summary{ cursor:pointer; list-style:none; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-family:'Spectral',serif; font-weight:600; font-size:1.05rem; }
+  details.lld summary::-webkit-details-marker{ display:none; }
+  details.lld summary .lld-meta{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--ink-muted); font-weight:400; white-space:nowrap; }
+  details.lld summary::after{ content:'+'; font-family:'IBM Plex Mono',monospace; font-size:1.1rem; color:var(--route); flex:none; }
+  details.lld[open] summary::after{ content:'−'; }
+  details.lld .lld-body{ padding:0 18px 20px; border-top:1px solid var(--line); }
+  details.lld .lld-body p.lead{ margin:16px 0 14px; }
+  details.lld .lld-steps{ margin:0; padding-left:20px; font-size:.9rem; }
+  details.lld .lld-steps li{ margin-bottom:8px; }
+  details.lld .lld-steps li::marker{ color:var(--route); font-family:'IBM Plex Mono',monospace; }
+
+  /* execution checklist */
+  .phase-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); margin-bottom:16px; }
+  .phase-card-head{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px 16px; padding:16px 18px; border-bottom:1px solid var(--line); }
+  .phase-card-head h3{ margin:0; font-size:1.05rem; }
+  .phase-card-head .win{ font-size:.76rem; color:var(--ink-muted); }
+  .phase-progress{ display:flex; align-items:center; gap:8px; font-size:.76rem; color:var(--ink-muted); }
+  .phase-progress .bar{ width:64px; height:6px; border-radius:3px; background:var(--surface-2); overflow:hidden; }
+  .phase-progress .bar > span{ display:block; height:100%; background:var(--route); border-radius:3px; transition:width .25s ease; }
+  ul.tasks{ list-style:none; margin:0; padding:12px 10px; display:flex; flex-direction:column; gap:2px; }
+  ul.tasks li{ display:flex; align-items:flex-start; gap:10px; padding:9px 8px; border-radius:7px; }
+  ul.tasks li:hover{ background:var(--surface-2); }
+  ul.tasks input[type="checkbox"]{ margin-top:3px; width:16px; height:16px; accent-color:var(--route); flex:none; cursor:pointer; }
+  ul.tasks label{ font-size:.91rem; cursor:pointer; }
+  ul.tasks li.done label{ color:var(--ink-muted); text-decoration:line-through; text-decoration-color:var(--line-strong); }
+
+  .overall-progress{ display:flex; align-items:center; gap:10px; }
+  .overall-progress .bar{ width:140px; height:8px; border-radius:4px; background:var(--surface-2); overflow:hidden; border:1px solid var(--line); }
+  .overall-progress .bar > span{ display:block; height:100%; background:var(--route); border-radius:4px; transition:width .25s ease; }
+  .reset-btn{ font:inherit; font-size:.78rem; color:var(--ink-muted); background:var(--surface); border:1px solid var(--line); border-radius:7px; padding:6px 12px; cursor:pointer; }
+  .reset-btn:hover{ color:var(--danger); border-color:var(--danger); }
+
+  figure{ margin:0; }
+  figcaption{ font-size:.83rem; color:var(--ink-muted); margin-top:10px; max-width:70ch; }
+  svg text{ fill:currentColor; }
+
+  footer{ border-top:1px solid var(--line); padding-top:20px; color:var(--ink-muted); font-size:.82rem; }
+
+  @media (max-width:900px){
+    .shell{ flex-direction:column; padding-inline:16px; }
+    nav.rail{ position:sticky; top:0; z-index:5; width:100%; max-height:none; background:var(--bg); border-bottom:1px solid var(--line); padding:14px 0 10px; margin-bottom:4px; }
+    nav.rail .brand-sub{ margin-bottom:10px; }
+    nav.rail ol{ display:flex; overflow-x:auto; gap:4px; padding:0 0 6px 16px; }
+    nav.rail ol::before{ left:4px; top:auto; bottom:auto; height:2px; width:auto; right:0; }
+    nav.rail li{ flex:none; }
+    nav.rail a{ white-space:nowrap; }
+    main{ border-left:none; padding:20px 0 60px; }
+    .leg-grid{ gap:12px; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="rail" aria-label="Table of contents">
+    <span class="brand">Migration Atlas</span>
+    <span class="brand-sub">AWS migration reference</span>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#dispositions">The 7 dispositions</a></li>
+      <li><a href="#methodology">Methodology</a></li>
+      <li><a href="#landing-zone">HLD — landing zone</a></li>
+      <li><a href="#factory">HLD — migration factory</a></li>
+      <li><a href="#lld">LLD — strategy playbooks</a></li>
+      <li><a href="#tooling">Tooling reference</a></li>
+      <li><a href="#execution">Execution &amp; cutover</a></li>
+      <li><a href="#governance">Governance &amp; RACI</a></li>
+      <li><a href="#risk-cost">Risk &amp; cost</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <span class="eyebrow">Cloud migration · reference &amp; execution guide</span>
+      <h1 class="title">Migration Atlas</h1>
+      <p class="subtitle">A working chart for moving an application portfolio into AWS — the 6/7&nbsp;R's disposition framework, end-to-end execution methodology, and the HLD/LLD detail behind every migration strategy, condensed into one navigable reference.</p>
+      <div class="meta-row">
+        <span class="pill route">Companion to the aws-migration/ repo</span>
+        <span class="pill">Scope: mixed estate — VMs, databases, SaaS candidates</span>
+        <span class="pill">Owner: Migration Lead</span>
+      </div>
+    </div>
+
+    <section id="overview">
+      <span class="sec-label">01 · Read this first</span>
+      <h2>Overview</h2>
+      <p class="lead">This page is the navigable summary of the full playbook checked into <code>aws-migration/docs</code> — read it top to bottom once, then use it as the working reference while a wave is in flight. The <a href="#execution">Execution &amp; Cutover</a> section is interactive: check items off as you actually do them, and your progress is saved.</p>
+
+      <div class="callout">
+        <span class="callout-label">How the two live together</span>
+        <p>This atlas is the map — decisions, sequence, and the shape of each strategy. The <code>docs/</code> folder is the terrain — full step-by-step runbooks, templates, and worked examples for every section here. Where a section below is a summary, it links to its source doc for the complete version.</p>
+      </div>
+
+      <p>Two frameworks run through everything that follows: the <strong>6/7&nbsp;R's</strong> decide <em>what</em> happens to each application, and the <strong>migration factory</strong> operating model decides <em>how</em> a wave of applications actually moves, repeatably, without every server being a bespoke project.</p>
+    </section>
+
+    <section id="dispositions">
+      <span class="sec-label">02 · Disposition</span>
+      <h2>The 7 dispositions</h2>
+      <p class="lead">Every application gets exactly one of these before it enters a wave plan. The mix you land on drives timeline, risk, and cost more than any other decision in the program.</p>
+
+      <div class="r-grid">
+        <div class="r-card"><span class="r-code">01 · RETIRE</span><h4>Retire</h4><p>Decommission apps with no ongoing business value — redundant, unowned, or already superseded.</p><div class="r-tool">Application Discovery Service</div></div>
+        <div class="r-card"><span class="r-code">02 · RETAIN</span><h4>Retain</h4><p>Leave it where it is — compliance lock-in, recent investment, or simply not prioritized yet.</p><div class="r-tool">Revisit trigger logged</div></div>
+        <div class="r-card"><span class="r-code">03 · RELOCATE</span><h4>Relocate</h4><p>Move VMware workloads at the hypervisor level, unchanged — fastest path for a VMware-heavy estate.</p><div class="r-tool">VMware Cloud on AWS + HCX</div></div>
+        <div class="r-card"><span class="r-code">04 · REHOST</span><h4>Rehost</h4><p>Lift-and-shift onto EC2 with no code change. Time-boxed, low-risk, defers modernization.</p><div class="r-tool">AWS MGN</div></div>
+        <div class="r-card"><span class="r-code">05 · REPLATFORM</span><h4>Replatform</h4><p>Lift-tinker-shift — swap a self-managed component for a managed AWS service, same architecture.</p><div class="r-tool">DMS + SCT, App2Container</div></div>
+        <div class="r-card"><span class="r-code">06 · REPURCHASE</span><h4>Repurchase</h4><p>Replace a licensed or homegrown app with a SaaS equivalent.</p><div class="r-tool">AppFlow, Identity Center</div></div>
+        <div class="r-card"><span class="r-code">07 · REFACTOR</span><h4>Refactor</h4><p>Redesign for cloud-native — containers, serverless, managed data services — for apps that justify it.</p><div class="r-tool">ECS / EKS / Lambda</div></div>
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">Rule of thumb</span>
+        <p>A healthy wave-1 portfolio skews 60–70% Rehost/Replatform, 10–20% Retire/Retain, and the remainder Refactor scheduled for later waves once the landing zone and the factory team are proven. Full decision tree and workshop template: <a href="../docs/02-6r-migration-strategies.md">docs/02-6r-migration-strategies.md</a>.</p>
+      </div>
+    </section>
+
+    <section id="methodology">
+      <span class="sec-label">03 · Method</span>
+      <h2>Migration methodology</h2>
+      <p class="lead">Four phases, the first two run once, the third repeats per wave, the fourth runs forever. Durations are typical for a 50–200 server estate — scale to your own.</p>
+
+      <div class="route-line">
+        <div class="leg">
+          <div class="leg-rail"><div class="leg-num">00</div><div class="leg-track"></div></div>
+          <div class="leg-body">
+            <h3>Assess</h3>
+            <span class="leg-win">Typical duration: 4–8 weeks</span>
+            <div class="leg-grid">
+              <div class="leg-col"><h4>Activities</h4><ul>
+                <li>Server/app discovery, agentless or agent-based</li>
+                <li>Dependency mapping to group apps into waves</li>
+                <li>7&nbsp;R's classification per application</li>
+                <li>TCO / business case via Migration Evaluator</li>
+              </ul></div>
+              <div class="leg-col"><h4>Exit criteria</h4><ul>
+                <li>Signed inventory and disposition per app</li>
+                <li>Approved business case</li>
+                <li>Initial wave groupings</li>
+              </ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="leg">
+          <div class="leg-rail"><div class="leg-num">01</div><div class="leg-track"></div></div>
+          <div class="leg-body">
+            <h3>Mobilize</h3>
+            <span class="leg-win">Typical duration: 4–10 weeks</span>
+            <div class="leg-grid">
+              <div class="leg-col"><h4>Activities</h4><ul>
+                <li>Landing zone build (accounts, network, guardrails)</li>
+                <li>Migration factory tooling stood up: MGN, DMS, Migration Hub</li>
+                <li>Wave planning against dependency graph + business calendar</li>
+                <li>Pilot migration — 1–2 low-risk apps</li>
+              </ul></div>
+              <div class="leg-col"><h4>Exit criteria</h4><ul>
+                <li>Landing zone passes security review</li>
+                <li>Pilot wave migrated and validated</li>
+                <li>Factory runbooks proven</li>
+              </ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="leg">
+          <div class="leg-rail"><div class="leg-num">02</div><div class="leg-track"></div></div>
+          <div class="leg-body">
+            <h3>Migrate &amp; modernize</h3>
+            <span class="leg-win">Rolling, per wave — 2–4 weeks each</span>
+            <div class="leg-grid">
+              <div class="leg-col"><h4>Activities</h4><ul>
+                <li>Replicate, test-launch, cut over per app (see §08)</li>
+                <li>Post-cutover bake, sign-off, decommission source</li>
+                <li>Modernize where the disposition calls for it</li>
+              </ul></div>
+              <div class="leg-col"><h4>Exit criteria</h4><ul>
+                <li>All apps in the wave signed off</li>
+                <li>No open P1/P2 incidents</li>
+                <li>Source decommissioned or scheduled</li>
+              </ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="leg">
+          <div class="leg-rail"><div class="leg-num">03</div></div>
+          <div class="leg-body">
+            <h3>Operate &amp; optimize</h3>
+            <span class="leg-win">Continuous, post go-live</span>
+            <div class="leg-grid">
+              <div class="leg-col"><h4>Activities</h4><ul>
+                <li>Rightsizing via Compute Optimizer, then Savings Plans</li>
+                <li>Well-Architected review per workload</li>
+                <li>Ongoing FinOps and SecOps</li>
+              </ul></div>
+              <div class="leg-col"><h4>Exit criteria</h4><ul>
+                <li>Handed to BAU ops with runbooks + on-call</li>
+                <li>Optimization backlog feeding future waves</li>
+              </ul></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:6px;">Full phase detail, wave-planning principles, and the RAID log approach: <a href="../docs/03-migration-methodology.md">docs/03-migration-methodology.md</a>.</p>
+    </section>
+
+    <section id="landing-zone">
+      <span class="sec-label">04 · HLD</span>
+      <h2>Landing zone — the foundation every workload lands into</h2>
+      <p class="lead">Built and guardrail-tested before the first production cutover. Nothing goes live in an account that hasn't been vended from this structure.</p>
+
+      <figure>
+        <svg viewBox="0 0 1000 460" role="img" aria-label="Diagram: an AWS Organizations management account governs a Security OU (log archive and audit accounts), an Infrastructure OU (network hub and shared services accounts), and a Workloads OU split into Production and Non-Production accounts. On-premises connects to the network hub account's Transit Gateway over Direct Connect with a VPN backup, and the network hub fans out to every workload VPC and a centralized egress VPC." style="width:100%;height:auto;font-family:'Public Sans',sans-serif;">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+            <marker id="arrRoute" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--route)"/></marker>
+          </defs>
+
+          <rect x="14" y="150" width="150" height="90" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.4" stroke-dasharray="5,4"/>
+          <text x="89" y="140" text-anchor="middle" font-size="12" font-weight="700">ON-PREMISES</text>
+          <text x="89" y="200" text-anchor="middle" font-size="11">Source estate</text>
+
+          <line x1="164" y1="195" x2="230" y2="195" stroke="var(--route)" stroke-width="2" marker-end="url(#arrRoute)"/>
+          <text x="197" y="184" text-anchor="middle" font-size="9" fill="var(--route)" font-weight="600">DX + VPN</text>
+
+          <rect x="230" y="20" width="756" height="420" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="608" y="44" text-anchor="middle" font-size="13" font-weight="700">AWS ORGANIZATION — MANAGEMENT ACCOUNT</text>
+
+          <rect x="252" y="66" width="220" height="150" rx="8" fill="none" stroke="var(--flag)" stroke-width="1.4"/>
+          <text x="362" y="88" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--flag)">SECURITY OU</text>
+          <rect x="268" y="102" width="188" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="362" y="127" text-anchor="middle" font-size="10.5">Log Archive account</text>
+          <rect x="268" y="154" width="188" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="362" y="179" text-anchor="middle" font-size="10.5">Audit / tooling account</text>
+
+          <rect x="252" y="232" width="220" height="150" rx="8" fill="none" stroke="var(--flag)" stroke-width="1.4"/>
+          <text x="362" y="254" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--flag)">INFRASTRUCTURE OU</text>
+          <rect x="268" y="268" width="188" height="42" rx="6" fill="var(--route-soft)" stroke="var(--route)" stroke-width="1.3"/>
+          <text x="362" y="293" text-anchor="middle" font-size="10.5" font-weight="600">Network Hub — Transit Gateway</text>
+          <rect x="268" y="320" width="188" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="362" y="345" text-anchor="middle" font-size="10.5">Shared Services account</text>
+
+          <rect x="500" y="66" width="466" height="316" rx="8" fill="none" stroke="var(--flag)" stroke-width="1.4"/>
+          <text x="733" y="88" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--flag)">WORKLOADS OU</text>
+
+          <rect x="516" y="104" width="212" height="130" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="622" y="124" text-anchor="middle" font-size="10.5" font-weight="700">Prod</text>
+          <rect x="530" y="136" width="184" height="34" rx="5" fill="var(--route-soft)" stroke="var(--route)" stroke-width="1.1"/>
+          <text x="622" y="157" text-anchor="middle" font-size="9.5">App account 1 — VPC</text>
+          <rect x="530" y="178" width="184" height="34" rx="5" fill="var(--route-soft)" stroke="var(--route)" stroke-width="1.1"/>
+          <text x="622" y="199" text-anchor="middle" font-size="9.5">App account N — VPC</text>
+
+          <rect x="738" y="104" width="212" height="130" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="844" y="124" text-anchor="middle" font-size="10.5" font-weight="700">Non-Prod</text>
+          <rect x="752" y="136" width="184" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="844" y="157" text-anchor="middle" font-size="9.5">Dev account — VPC</text>
+          <rect x="752" y="178" width="184" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="844" y="199" text-anchor="middle" font-size="9.5">Test/Staging account — VPC</text>
+
+          <rect x="516" y="250" width="434" height="46" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.7" stroke-width="1.1" stroke-dasharray="4,3"/>
+          <text x="733" y="278" text-anchor="middle" font-size="10">Centralized egress VPC — NAT / Network Firewall</text>
+
+          <line x1="456" y1="289" x2="516" y2="152" stroke="var(--route)" stroke-width="1.3" marker-end="url(#arrRoute)"/>
+          <line x1="456" y1="289" x2="516" y2="194" stroke="var(--route)" stroke-width="1.3" marker-end="url(#arrRoute)"/>
+          <line x1="456" y1="289" x2="738" y2="152" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.1" marker-end="url(#arr)"/>
+          <line x1="456" y1="289" x2="738" y2="194" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.1" marker-end="url(#arr)"/>
+          <line x1="456" y1="289" x2="733" y2="273" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.1" marker-end="url(#arr)"/>
+          <text x="490" y="238" text-anchor="middle" font-size="9" opacity="0.7">Transit Gateway attachments</text>
+
+          <g font-size="9.5" font-weight="600">
+            <rect x="516" y="360" width="100" height="22" rx="11" fill="none" stroke="var(--route)" stroke-width="1.1"/>
+            <text x="566" y="375" text-anchor="middle" fill="var(--route)">Control Tower</text>
+            <rect x="624" y="360" width="90" height="22" rx="11" fill="none" stroke="var(--route)" stroke-width="1.1"/>
+            <text x="669" y="375" text-anchor="middle" fill="var(--route)">GuardDuty</text>
+            <rect x="722" y="360" width="98" height="22" rx="11" fill="none" stroke="var(--route)" stroke-width="1.1"/>
+            <text x="771" y="375" text-anchor="middle" fill="var(--route)">Security Hub</text>
+            <rect x="828" y="360" width="108" height="22" rx="11" fill="none" stroke="var(--route)" stroke-width="1.1"/>
+            <text x="882" y="375" text-anchor="middle" fill="var(--route)">CloudTrail (org)</text>
+          </g>
+        </svg>
+        <figcaption>Fig. 1 — On-premises connects over Direct Connect (with VPN backup) into the Network Hub account's Transit Gateway, which fans out to every workload VPC and a centralized egress VPC. Every account is vended from Control Tower with the same guardrail baseline before it takes traffic.</figcaption>
+      </figure>
+
+      <h3>Account structure at a glance</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Account / OU</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td class="t-strong">Management</td><td>Organizations root, billing, SCP authoring — no workloads</td></tr>
+            <tr><td class="t-strong">Log Archive</td><td>Centralized, immutable CloudTrail / Config / Flow Logs</td></tr>
+            <tr><td class="t-strong">Audit / Security Tooling</td><td>GuardDuty, Security Hub, Detective delegated admin</td></tr>
+            <tr><td class="t-strong">Network Hub</td><td>Transit Gateway, Direct Connect Gateway, centralized egress</td></tr>
+            <tr><td class="t-strong">Shared Services</td><td>AD Connector / Managed AD, CI/CD, patching</td></tr>
+            <tr><td class="t-strong">Workloads — Prod / Non-Prod</td><td>One account per app(-group), split for blast-radius isolation</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:14px;">Full network CIDR planning, identity federation, and guardrail sequencing: <a href="../docs/04-hld-landing-zone.md">docs/04-hld-landing-zone.md</a>.</p>
+    </section>
+
+    <section id="factory">
+      <span class="sec-label">05 · HLD</span>
+      <h2>Migration factory — the operating model that runs waves</h2>
+      <p class="lead">The factory turns the disposition backlog into moving applications: a tracking hub, replication tooling, and an orchestration layer that make every server or database migration a repeat of the same proven steps.</p>
+
+      <figure>
+        <svg viewBox="0 0 1000 300" role="img" aria-label="Diagram: source servers replicate through AWS Application Migration Service and source databases replicate through AWS Database Migration Service with Schema Conversion Tool, both landing in a staging subnet of the target workload account before cutover to production, all tracked centrally by AWS Migration Hub." style="width:100%;height:auto;font-family:'Public Sans',sans-serif;">
+          <defs><marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--route)"/></marker></defs>
+
+          <rect x="16" y="30" width="190" height="230" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.3" stroke-dasharray="5,4"/>
+          <text x="111" y="20" text-anchor="middle" font-size="12" font-weight="700">SOURCE</text>
+          <rect x="34" y="60" width="154" height="54" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="111" y="90" text-anchor="middle" font-size="10.5">Application servers</text>
+          <rect x="34" y="130" width="154" height="54" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="111" y="160" text-anchor="middle" font-size="10.5">Databases</text>
+          <rect x="34" y="200" width="154" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="1.1"/>
+          <text x="111" y="225" text-anchor="middle" font-size="10.5">File / object storage</text>
+
+          <rect x="238" y="30" width="220" height="230" rx="8" fill="none" stroke="var(--route)" stroke-width="1.4"/>
+          <text x="348" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="var(--route)">MIGRATION FACTORY</text>
+          <rect x="254" y="46" width="188" height="38" rx="6" fill="var(--route-soft)" stroke="var(--route)" stroke-width="1.1"/>
+          <text x="348" y="69" text-anchor="middle" font-size="10">AWS MGN</text>
+          <rect x="254" y="94" width="188" height="38" rx="6" fill="var(--route-soft)" stroke="var(--route)" stroke-width="1.1"/>
+          <text x="348" y="117" text-anchor="middle" font-size="10">AWS DMS + SCT</text>
+          <rect x="254" y="142" width="188" height="38" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="348" y="165" text-anchor="middle" font-size="10">App2Container</text>
+          <rect x="254" y="190" width="188" height="52" rx="6" fill="var(--surface-2)" stroke="currentColor" stroke-opacity="0.6" stroke-width="1"/>
+          <text x="348" y="211" text-anchor="middle" font-size="10" font-weight="600">Migration Hub</text>
+          <text x="348" y="227" text-anchor="middle" font-size="8.5" opacity="0.7">wave status, single pane</text>
+
+          <line x1="188" y1="87" x2="254" y2="65" stroke="var(--route)" stroke-width="1.6" marker-end="url(#arr2)"/>
+          <line x1="188" y1="157" x2="254" y2="113" stroke="var(--route)" stroke-width="1.6" marker-end="url(#arr2)"/>
+
+          <rect x="530" y="30" width="454" height="230" rx="8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <text x="757" y="20" text-anchor="middle" font-size="12" font-weight="700">TARGET WORKLOAD ACCOUNT</text>
+
+          <rect x="546" y="50" width="200" height="190" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.1" stroke-dasharray="4,3"/>
+          <text x="646" y="68" text-anchor="middle" font-size="10.5" font-weight="700">STAGING SUBNET</text>
+          <rect x="562" y="82" width="168" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="646" y="107" text-anchor="middle" font-size="9.5">Test instance</text>
+          <rect x="562" y="134" width="168" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="646" y="159" text-anchor="middle" font-size="9.5">Target DB (CDC)</text>
+          <text x="646" y="215" text-anchor="middle" font-size="9" opacity="0.65">validated here first —</text>
+          <text x="646" y="228" text-anchor="middle" font-size="9" opacity="0.65">no production traffic</text>
+
+          <line x1="746" y1="140" x2="800" y2="140" stroke="var(--flag)" stroke-width="1.8" marker-end="url(#arr2)"/>
+          <text x="773" y="128" text-anchor="middle" font-size="9" fill="var(--flag)" font-weight="600">cutover</text>
+
+          <rect x="800" y="50" width="168" height="190" rx="6" fill="var(--route-soft)" stroke="var(--route)" stroke-width="1.3"/>
+          <text x="884" y="68" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--route)">PRODUCTION</text>
+          <rect x="814" y="90" width="140" height="40" rx="5" fill="var(--surface)" stroke="var(--route)" stroke-width="1"/>
+          <text x="884" y="113" text-anchor="middle" font-size="9.5">Live instance</text>
+          <rect x="814" y="140" width="140" height="40" rx="5" fill="var(--surface)" stroke="var(--route)" stroke-width="1"/>
+          <text x="884" y="163" text-anchor="middle" font-size="9.5">Live database</text>
+
+          <line x1="458" y1="145" x2="530" y2="145" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.3" marker-end="url(#arr2)"/>
+          <text x="494" y="133" text-anchor="middle" font-size="9" opacity="0.7">replicate</text>
+        </svg>
+        <figcaption>Fig. 2 — MGN and DMS+SCT replicate continuously into a staging subnet where every server or database is validated before cutover; Migration Hub tracks status across both tools so the wave dashboard always reflects reality.</figcaption>
+      </figure>
+      <p>Full factory staffing model and connectivity requirements: <a href="../docs/05-hld-migration-factory.md">docs/05-hld-migration-factory.md</a>.</p>
+    </section>
+
+    <section id="lld">
+      <span class="sec-label">06 · LLD</span>
+      <h2>Strategy playbooks — low-level design</h2>
+      <p class="lead">Open each strategy for its step-by-step execution. These are the condensed runbooks; full versions with rollback plans and checklists live in <code>docs/06</code> through <code>docs/10</code>.</p>
+
+      <details class="lld">
+        <summary>Rehost — lift &amp; shift via AWS MGN <span class="lld-meta">docs/06</span></summary>
+        <div class="lld-body">
+          <p class="lead">Continuous block-level replication into EC2 with no code change — the fastest, lowest-risk exit from a source environment.</p>
+          <ol class="lld-steps">
+            <li>Install the MGN replication agent — initial sync, then continuous CDC while the source stays live.</li>
+            <li>Configure launch settings: instance type, subnet, security groups, IAM role, encryption.</li>
+            <li>Monitor replication lag until stable for 24h+.</li>
+            <li>Test-launch in an isolated staging subnet; run functional and performance validation.</li>
+            <li>Cut over: freeze source, final sync, launch, re-point DNS/LB, smoke test.</li>
+            <li>Bake 48–72h with source powered on as the rollback path, then decommission.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary>Replatform — DMS/SCT and App2Container <span class="lld-meta">docs/07</span></summary>
+        <div class="lld-body">
+          <p class="lead">Swap a self-managed database or app server for a managed AWS equivalent without changing the surrounding architecture.</p>
+          <ol class="lld-steps">
+            <li>Run an SCT assessment for schema/code compatibility before committing a wave date.</li>
+            <li>Provision the target (RDS/Aurora, right-sized, Multi-AZ, encrypted) or run App2Container to containerize the app server.</li>
+            <li>DMS full load, then CDC to keep the target in sync while the source stays live.</li>
+            <li>Validate with DMS data checks (row counts, checksums) plus app-level smoke tests.</li>
+            <li>Cut over: brief write-freeze, re-point connection strings, verify zero replication lag.</li>
+            <li>Bake, then decommission the source.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary>Repurchase — move to SaaS <span class="lld-meta">docs/08</span></summary>
+        <div class="lld-body">
+          <p class="lead">Replace the application with a SaaS product — the biggest risk here is adoption, not technology.</p>
+          <ol class="lld-steps">
+            <li>Map legacy data fields to the SaaS data model; resolve gaps before migration, not during cutover.</li>
+            <li>Design integrations via AWS AppFlow or direct API for every upstream/downstream dependency.</li>
+            <li>Federate SSO from IAM Identity Center to the SaaS platform.</li>
+            <li>Migrate historical data, reconcile record counts.</li>
+            <li>Run a parallel period, then cut over and freeze the legacy system.</li>
+            <li>Train users and brief the help desk before, not after, cutover.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary>Refactor — re-architect for cloud-native <span class="lld-meta">docs/09</span></summary>
+        <div class="lld-body">
+          <p class="lead">Strangler-fig the monolith apart one bounded context at a time — never a big-bang rewrite.</p>
+          <ol class="lld-steps">
+            <li>Identify bounded contexts (domain-driven design) as candidate services.</li>
+            <li>Put a routing facade in front of the monolith; 100% of traffic still goes through initially.</li>
+            <li>Extract one capability at a time onto its own compute (Lambda/ECS) and its own datastore.</li>
+            <li>Backfill or CDC the relevant data, then shift the facade's routing rule.</li>
+            <li>Decouple new services with EventBridge/SQS/SNS in place of direct calls.</li>
+            <li>Repeat until the monolith is empty or intentionally reduced in scope.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary>Retire &amp; Retain <span class="lld-meta">docs/10</span></summary>
+        <div class="lld-body">
+          <p class="lead">Retire is a process with a paper trail; Retain is a decision with an expiry date — neither should happen silently.</p>
+          <ol class="lld-steps">
+            <li>Retire: verify zero usage (data + business sign-off), give a formal objection window, archive data, disconnect integrations, then decommission and cancel licenses.</li>
+            <li>Retain: log the reason, the owner, and a revisit trigger — a retain without a trigger date is scope creep.</li>
+            <li>If a retained system must reach migrated workloads, connect it narrowly via Direct Connect/VPN into the specific VPCs it needs, or consider AWS Outposts if it needs native AWS APIs on-prem.</li>
+          </ol>
+        </div>
+      </details>
+    </section>
+
+    <section id="tooling">
+      <span class="sec-label">07 · Tooling</span>
+      <h2>Tooling reference</h2>
+      <p class="lead">Which AWS service to reach for, by job. Full reference including data-transfer and mainframe tooling: <a href="../docs/12-tools-and-services.md">docs/12-tools-and-services.md</a>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Job</th><th>Service</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="t-strong">Discovery</td><td>Application Discovery Service</td><td>Agentless or agent-based server/dependency inventory</td></tr>
+            <tr><td class="t-strong">Business case</td><td>Migration Evaluator</td><td>Agentless TCO comparison against current-state spend</td></tr>
+            <tr><td class="t-strong">Server migration</td><td>Application Migration Service (MGN)</td><td>Free tool — you pay only for target infrastructure</td></tr>
+            <tr><td class="t-strong">VMware estates</td><td>VMware Cloud on AWS + HCX</td><td>No OS/hypervisor conversion required</td></tr>
+            <tr><td class="t-strong">Database migration</td><td>DMS + Schema Conversion Tool</td><td>Homogeneous and heterogeneous engine changes</td></tr>
+            <tr><td class="t-strong">Containerize without rewrite</td><td>App2Container</td><td>Java/.NET apps → ECR image + ECS/EKS task def</td></tr>
+            <tr><td class="t-strong">Bulk data transfer</td><td>DataSync / Snowball</td><td>Online sync vs. offline physical transfer for very large volumes</td></tr>
+            <tr><td class="t-strong">Tracking</td><td>Migration Hub</td><td>Single pane of glass across every tool above</td></tr>
+            <tr><td class="t-strong">Landing zone</td><td>Control Tower + Organizations</td><td>Account vending, SCP guardrails</td></tr>
+            <tr><td class="t-strong">Rightsizing</td><td>Compute Optimizer</td><td>Recommendations from real observed utilization</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="execution">
+      <span class="sec-label">08 · Do this</span>
+      <h2>Execution &amp; cutover</h2>
+      <p class="lead">The wave lifecycle, broken into the checklists a migration engineer actually runs against, in order. Check items off as you complete them — your progress is saved and synced automatically.</p>
+
+      <div class="callout flag" id="db-status">
+        <span class="callout-label">Progress is local to this browser</span>
+        <p>Live sync isn't available in this view, so checks are saved on this device only (via local storage).</p>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+        <div class="overall-progress">
+          <span>Overall progress</span>
+          <div class="bar"><span id="overall-bar" style="width:0%"></span></div>
+          <span id="overall-label" class="mono">0 / 0</span>
+        </div>
+        <button class="reset-btn" id="reset-progress" type="button">Reset all progress</button>
+      </div>
+
+      <div id="checklist-root"></div>
+    </section>
+
+    <section id="governance">
+      <span class="sec-label">09 · Governance</span>
+      <h2>Governance &amp; RACI</h2>
+      <p class="lead">The same five roles run every wave; only the applications change. Full governance cadence and decision rights: <a href="../docs/13-raci-governance.md">docs/13-raci-governance.md</a>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Milestone</th><th class="center">Migration Lead</th><th class="center">Cloud Architect</th><th class="center">App Owner</th><th class="center">Security</th><th class="center">Cutover Coord.</th></tr></thead>
+          <tbody>
+            <tr><td class="t-strong">6R classification</td><td class="center"><span class="raci A">A</span></td><td class="center"><span class="raci R">R</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci I">I</span></td></tr>
+            <tr><td class="t-strong">Landing zone design</td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci A">A</span></td><td class="center"><span class="raci I">I</span></td><td class="center"><span class="raci R">R</span></td><td class="center"><span class="raci I">I</span></td></tr>
+            <tr><td class="t-strong">Wave plan sign-off</td><td class="center"><span class="raci A">A</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci R">R</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci R">R</span></td></tr>
+            <tr><td class="t-strong">Go / No-Go decision</td><td class="center"><span class="raci A">A</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci R">R</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci R">R</span></td></tr>
+            <tr><td class="t-strong">Cutover execution</td><td class="center"><span class="raci I">I</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci R">R</span></td><td class="center"><span class="raci A">A</span></td></tr>
+            <tr><td class="t-strong">Source decommission</td><td class="center"><span class="raci C">C</span></td><td class="center"><span class="raci I">I</span></td><td class="center"><span class="raci A">A</span></td><td class="center"><span class="raci R">R</span></td><td class="center"><span class="raci R">R</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:14px; font-size:.86rem; color:var(--ink-muted);"><span class="raci R" style="margin-right:6px;">R</span>Responsible &nbsp; <span class="raci A" style="margin-right:6px;">A</span>Accountable &nbsp; <span class="raci C" style="margin-right:6px;">C</span>Consulted &nbsp; <span class="raci I" style="margin-right:6px;">I</span>Informed</p>
+    </section>
+
+    <section id="risk-cost">
+      <span class="sec-label">10 · FinOps &amp; risk</span>
+      <h2>Risk &amp; cost</h2>
+      <p class="lead">Full risk register and the ongoing FinOps motion: <a href="../docs/14-risk-cost-optimization.md">docs/14-risk-cost-optimization.md</a>.</p>
+
+      <h3>Top risks</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td class="t-strong">Undiscovered dependency breaks at cutover</td><td>High</td><td>Thorough dependency mapping; bake period before decommission</td></tr>
+            <tr><td class="t-strong">Replication bandwidth too small for the cutover window</td><td>High</td><td>Size Direct Connect/VPN from discovery data; test throughput before committing dates</td></tr>
+            <tr><td class="t-strong">Landing zone guardrail gap</td><td>High</td><td>Security review sign-off before any account takes production traffic</td></tr>
+            <tr><td class="t-strong">Refactor scope creep</td><td>High</td><td>Lock service boundaries before build; changes go through steering committee</td></tr>
+            <tr><td class="t-strong">Rollback plan untested</td><td>Critical</td><td>Rehearse rollback in the pilot wave; mandatory in every cutover runbook</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Cost levers, in order of impact</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Lever</th><th>Mechanism</th></tr></thead>
+          <tbody>
+            <tr><td class="t-strong">Rightsize before committing spend</td><td>Migrate at parity, then use 30–60 days of Compute Optimizer data before buying commitments</td></tr>
+            <tr><td class="t-strong">Commit after rightsizing</td><td>Savings Plans/RIs against the rightsized baseline, not the lift-and-shift one</td></tr>
+            <tr><td class="t-strong">Storage tiering</td><td>S3 Lifecycle to IA/Glacier; gp3 over gp2 for EBS</td></tr>
+            <tr><td class="t-strong">Mandatory tagging</td><td>Enforce <code>app</code>/<code>env</code>/<code>cost-center</code>/<code>owner</code> tags from account vending onward</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      Migration Atlas — navigable summary of the AWS migration playbook checked into <code>aws-migration/docs</code>. Verify current AWS service features and pricing against AWS documentation before finalizing any design.
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.rail a'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function onScroll(){
+    var best = 0, bestTop = -Infinity;
+    sections.forEach(function(sec, i){
+      if(!sec) return;
+      var top = sec.getBoundingClientRect().top;
+      if(top <= 120 && top > bestTop){ bestTop = top; best = i; }
+    });
+    links.forEach(function(a, i){ a.classList.toggle('active', i === best); });
+  }
+  document.addEventListener('scroll', onScroll, { passive:true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
+</script>
+
+<script>
+(function(){
+  var RUNBOOK = [
+    { phase:"Wave Kickoff", win:"T-4 to T-2 weeks", items:[
+      { id:"kickoff-1", label:"Confirm app list and 6R assignment for the wave — no late scope changes without Migration Lead approval" },
+      { id:"kickoff-2", label:"Confirm target accounts/VPCs/subnets are provisioned and guardrail-compliant" },
+      { id:"kickoff-3", label:"Assign owners: migration engineer, app owner, DBA, network/security contact" },
+      { id:"kickoff-4", label:"Schedule maintenance windows against the business calendar, avoiding blackout periods" },
+      { id:"kickoff-5", label:"Communicate the wave plan to every stakeholder on the dependency map" }
+    ]},
+    { phase:"Pre-Migration Prep", win:"T-2 weeks to T-2 days", items:[
+      { id:"prep-1", label:"Source server/DB access confirmed — credentials and firewall rules for replication traffic" },
+      { id:"prep-2", label:"MGN agent / DMS replication instance deployed, initial sync started" },
+      { id:"prep-3", label:"Backup of source verified restorable, independent of replication" },
+      { id:"prep-4", label:"Security group / NACL mapping from source to target documented and applied" },
+      { id:"prep-5", label:"Rollback plan written and reviewed with the app owner" }
+    ]},
+    { phase:"Replication Monitoring", win:"Ongoing until cutover", items:[
+      { id:"repl-1", label:"Replication lag within threshold, monitored via CloudWatch / Migration Hub" },
+      { id:"repl-2", label:"Alarms configured for replication failure or lag breach" },
+      { id:"repl-3", label:"Daily check-in on wave status in the factory stand-up" }
+    ]},
+    { phase:"Test Migration", win:"T-1 week to T-2 days", items:[
+      { id:"test-1", label:"Test instance/database launched in an isolated staging subnet" },
+      { id:"test-2", label:"Functional test suite executed against app owner-defined acceptance criteria" },
+      { id:"test-3", label:"Performance baseline compared against the source" },
+      { id:"test-4", label:"Security scan (Inspector) run against the test instance" },
+      { id:"test-5", label:"Defects triaged and closed, or explicitly accepted, before go/no-go" }
+    ]},
+    { phase:"Go / No-Go Review", win:"T-1 day", items:[
+      { id:"gng-1", label:"All test validations passed, or defects accepted with sign-off" },
+      { id:"gng-2", label:"Replication healthy and stable for the required lookback window (24–48h)" },
+      { id:"gng-3", label:"Rollback plan confirmed and understood by all parties" },
+      { id:"gng-4", label:"Maintenance window and stakeholder comms confirmed" },
+      { id:"gng-5", label:"Decision recorded: Go / No-Go / Conditional-Go" }
+    ]},
+    { phase:"Cutover Execution", win:"Maintenance window", items:[
+      { id:"cut-1", label:"Freeze changes on the source (or accept the defined delta window)" },
+      { id:"cut-2", label:"Final sync confirmed caught up" },
+      { id:"cut-3", label:"Cutover instance launched / target database promoted" },
+      { id:"cut-4", label:"DNS / load balancer / connection strings updated" },
+      { id:"cut-5", label:"Smoke test checklist executed" },
+      { id:"cut-6", label:"Monitoring and alerting confirmed active on the new production resource" },
+      { id:"cut-7", label:"Actual start/end time and any deviations logged by the Cutover Coordinator" }
+    ]},
+    { phase:"Bake Period", win:"48–72h, longer for Tier-1", items:[
+      { id:"bake-1", label:"Error rates, latency, and resource utilization monitored against baseline" },
+      { id:"bake-2", label:"No open P1/P2 incidents" },
+      { id:"bake-3", label:"App owner performs business-process validation, not just a technical smoke test" },
+      { id:"bake-4", label:"Source kept powered on (not deleted) as the rollback path throughout" }
+    ]},
+    { phase:"Sign-off & Decommission", win:"Post bake period", items:[
+      { id:"signoff-1", label:"App owner formal sign-off recorded" },
+      { id:"signoff-2", label:"Migration Hub / tracking updated to Complete" },
+      { id:"signoff-3", label:"Decommission ticket raised for the source per the Retire runbook" }
+    ]}
+  ];
+
+  var STORAGE_KEY = "migrationAtlasProgress";
+  var state = { checked: {} };
+  var db = null;
+
+  function loadLocal(){
+    try{
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveLocal(obj){
+    try{ window.localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }catch(e){}
+  }
+
+  function render(){
+    var root = document.getElementById('checklist-root');
+    root.innerHTML = RUNBOOK.map(function(group){
+      var doneCount = group.items.filter(function(it){ return !!state.checked[it.id]; }).length;
+      var pct = Math.round((doneCount / group.items.length) * 100);
+      var itemsHtml = group.items.map(function(it){
+        var checked = !!state.checked[it.id];
+        return '<li class="' + (checked ? 'done' : '') + '">' +
+          '<input type="checkbox" id="' + it.id + '"' + (checked ? ' checked' : '') + '>' +
+          '<label for="' + it.id + '">' + it.label + '</label>' +
+          '</li>';
+      }).join('');
+      return '<div class="phase-card" data-phase="' + group.phase + '">' +
+        '<div class="phase-card-head">' +
+          '<h3>' + group.phase + '</h3>' +
+          '<span class="win">' + group.win + '</span>' +
+          '<div class="phase-progress"><div class="bar"><span style="width:' + pct + '%"></span></div><span class="mono">' + doneCount + '/' + group.items.length + '</span></div>' +
+        '</div>' +
+        '<ul class="tasks">' + itemsHtml + '</ul>' +
+      '</div>';
+    }).join('');
+
+    root.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        state.checked[cb.id] = cb.checked;
+        saveLocal(state.checked);
+        if(db){ db.doc('progress/checklist').set(state.checked).catch(function(){}); }
+        render();
+      });
+    });
+
+    updateOverall();
+  }
+
+  function updateOverall(){
+    var total = 0, done = 0;
+    RUNBOOK.forEach(function(g){
+      total += g.items.length;
+      done += g.items.filter(function(it){ return !!state.checked[it.id]; }).length;
+    });
+    var pct = total ? Math.round((done / total) * 100) : 0;
+    var bar = document.getElementById('overall-bar');
+    var label = document.getElementById('overall-label');
+    if(bar) bar.style.width = pct + '%';
+    if(label) label.textContent = done + ' / ' + total;
+  }
+
+  // paint immediately from local storage, then upgrade to live db sync
+  state.checked = loadLocal();
+  render();
+
+  document.getElementById('reset-progress').addEventListener('click', function(){
+    state.checked = {};
+    saveLocal(state.checked);
+    if(db){ db.doc('progress/checklist').set({}).catch(function(){}); }
+    render();
+  });
+
+  (async function(){
+    try{
+      if(!window.claude || !window.claude.use) return;
+      db = await window.claude.use('db');
+      if(!db) return;
+      document.getElementById('db-status').hidden = true;
+      db.doc('progress/checklist').onSnapshot(function(snap){
+        state.checked = snap.exists ? (snap.data() || {}) : {};
+        saveLocal(state.checked);
+        render();
+      }, function(){ /* fall back silently to local storage */ });
+    }catch(e){ /* no db in this view — local storage already active */ }
+  })();
+})();
+</script>
