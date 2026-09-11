@@ -1,0 +1,10 @@
+aws_region              = "us-east-1"
+allowed_regions         = ["us-east-1", "us-east-2"]
+audit_account_id        = "222222222222"
+log_archive_account_id  = "111111111111"
+log_archive_bucket_name = "acme-log-archive-a1b2c3"
+log_archive_kms_key_arn = "arn:aws:kms:us-east-1:111111111111:key/REPLACE-ME"
+
+member_accounts = {
+  # "app1-prod" = { email = "aws-app1-prod@example.com", ou = "Workloads/Prod" }
+}

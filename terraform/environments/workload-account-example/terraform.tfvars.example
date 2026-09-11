@@ -1,0 +1,12 @@
+aws_region  = "us-east-1"
+app_name    = "ordermgmt"
+environment = "prod"
+vpc_cidr    = "10.10.0.0/24"
+azs         = ["us-east-1a", "us-east-1b"]
+
+transit_gateway_id = "tgw-0123456789abcdef0"
+db_port            = 1521 # Oracle, per the OrderMgmt-Legacy example
+onprem_cidrs       = []   # e.g. ["10.0.0.0/16"] if the data tier needs to reach an on-prem AD or backup target
+
+log_archive_bucket_name = "acme-log-archive-a1b2c3"
+log_archive_kms_key_arn = "arn:aws:kms:us-east-1:111111111111:key/REPLACE-ME"

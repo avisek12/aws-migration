@@ -1,0 +1,3 @@
+aws_region      = "us-east-1"
+organization_id = "o-abc1234567"
+bucket_name     = "acme-log-archive-a1b2c3"
