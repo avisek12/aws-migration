@@ -1,14 +1,19 @@
-# State for the management account stack. The S3 bucket + DynamoDB lock
-# table referenced here must exist before `terraform init` — bootstrap them
-# by hand (or with a tiny separate one-off stack) since Terraform can't
-# create the backend it's about to store its own state in.
+# State for the management account stack.
+#
+# By default (the block below left commented out) Terraform uses LOCAL
+# state — a terraform.tfstate file in this directory. Fine for a first
+# look, but it lives only on this machine: no backup, no locking against
+# two concurrent applies, and it's exactly what you'd need if you ever
+# have to `terraform destroy` this stack for real. Before applying
+# anything you intend to keep, switch to remote state:
+#
+#   1. Bootstrap this account's S3 bucket + DynamoDB lock table once via
+#      ../../bootstrap-backend/ (see its README).
+#   2. Copy backend.hcl.example -> backend.hcl here and fill in the
+#      values bootstrap-backend printed as outputs.
+#   3. Uncomment the block below, then run:
+#        terraform init -backend-config=backend.hcl
 #
 # terraform {
-#   backend "s3" {
-#     bucket         = "your-org-tfstate-management"
-#     key            = "landing-zone/management/terraform.tfstate"
-#     region         = "us-east-1"
-#     dynamodb_table = "your-org-tfstate-locks"
-#     encrypt        = true
-#   }
+#   backend "s3" {}
 # }

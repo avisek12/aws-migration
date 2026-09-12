@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ stack.title }} — Environment Scaffolder</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <span class="brand">{{ stack.icon | safe }} Environment Scaffolder</span>
+  </header>
+  <main>
+    <p><a href="{{ url_for('index') }}">&larr; Back</a></p>
+    <h1><span class="step">{{ stack.step }}</span> {{ stack.title }}</h1>
+    <p>{{ stack.description }}</p>
+    {% if stack.note %}<p class="note">{{ stack.note }}</p>{% endif %}
+    {% if stack.singleton %}
+    <div class="callout">
+      <strong>Setting up your first landing zone?</strong>
+      <p>This account type normally exists once. If <code>terraform/environments/{{ stack.template_dirname }}</code>
+      is your actual, only instance of it, don't create a new folder here —
+      go fill in <em>that</em> folder's <code>terraform.tfvars</code> directly
+      (or via <a href="http://127.0.0.1:5000/">the Landing Zone UI</a>).
+      Only use the form below for an <em>additional</em> instance (a second
+      client's landing zone, a DR-region Network Hub, etc.).</p>
+    </div>
+    {% endif %}
+
+    {% if result and result.ok %}
+    <div class="success">
+      <h2>{{ check_icon | safe }} Created {{ result.folder }}/</h2>
+      <p>Files:</p>
+      <ul>{% for f in result.files %}<li><code>{{ f }}</code></li>{% endfor %}</ul>
+      <p>Next steps, from the CLI:</p>
+      <pre class="output ok">cd {{ result.folder }}
+terraform init
+terraform plan
+terraform apply</pre>
+      <p>
+        For durable state before you apply anything you intend to keep, see
+        <code>terraform/bootstrap-backend/README.md</code> and this folder's
+        own <code>backend.tf</code> comment. To tear it down later, see
+        <code>terraform/DESTROY.md</code>.
+      </p>
+      <p><a href="{{ url_for('new_environment', stack_key=stack_key) }}">Create another</a></p>
+    </div>
+    {% else %}
+
+    {% if result and not result.ok %}
+    <p class="error">{{ alert_icon | safe }} {{ result.message }}</p>
+    {% endif %}
+
+    <form method="post" id="scaffold-form">
+      {% if stack.is_workload %}
+      <fieldset>
+        <legend>App identity</legend>
+        <label>App name
+          <input type="text" name="app_name" required placeholder="ordermgmt">
+          <span class="help">Letters/numbers only — the folder becomes environments/&lt;app&gt;-&lt;environment&gt;/.</span>
+        </label>
+        <label>Environment
+          <select name="environment">
+            <option value="prod">prod</option>
+            <option value="nonprod">nonprod</option>
+          </select>
+        </label>
+      </fieldset>
+      {% else %}
+      <fieldset>
+        <legend>Folder</legend>
+        <label>Folder name
+          <input type="text" name="folder_name" required placeholder="e.g. network-hub-dr, audit-clientb">
+          <span class="help">Becomes terraform/environments/&lt;this&gt;/. Lowercase letters, numbers, hyphens only.</span>
+        </label>
+      </fieldset>
+      {% endif %}
+
+      <fieldset>
+        <legend>Configuration</legend>
+        {% for field in stack.fields %}
+        <label>
+          {{ field.label }}{% if field.required %} *{% endif %}
+          {% if field.type == "checkbox" %}
+            <input type="checkbox" name="{{ field.name }}">
+          {% elif field.type == "number" %}
+            <input type="number" name="{{ field.name }}" value="{{ field.get('default', '') }}">
+          {% else %}
+            <input type="text" name="{{ field.name }}" value="{{ field.get('default', '') }}" {% if field.required %}required{% endif %}>
+          {% endif %}
+          {% if field.help %}<span class="help">{{ field.help }}</span>{% endif %}
+        </label>
+        {% endfor %}
+      </fieldset>
+
+      <button type="submit" id="submit-btn">
+        <span class="spinner"></span>
+        <span class="btn-label">Create folder</span>
+      </button>
+    </form>
+    <script>
+      document.getElementById('scaffold-form').addEventListener('submit', function () {
+        var btn = document.getElementById('submit-btn');
+        btn.classList.add('loading');
+        btn.querySelector('.btn-label').textContent = 'Creating…';
+        btn.disabled = true;
+      });
+    </script>
+    {% endif %}
+  </main>
+</body>
+</html>

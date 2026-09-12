@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Environment Scaffolder</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <span class="brand">{{ cloud_icon | safe }} Environment Scaffolder</span>
+    <span class="info">Writes files only — never runs terraform or talks to AWS</span>
+  </header>
+  <main>
+    <div class="hero">
+      <h1>Stand up a new environment folder in minutes</h1>
+      <p class="subtitle">Pick a stack, fill in the fields, and get real, committable Terraform code — ready for <code>terraform init / plan / apply</code> from the CLI.</p>
+    </div>
+
+    <div class="stepper">
+      {% for key, stack in stack_types.items() %}
+      <div class="step-item {{ 'workload' if stack.is_workload else '' }}">
+        <div class="circle">{{ stack.step }}</div>
+        <div class="label">{{ stack.title }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="callout">
+      <strong>New here? Read this first.</strong>
+      <p>
+        Four of the five stacks below are meant to exist <strong>once</strong> per
+        landing zone, and — for the landing zone already in this repo — they
+        <strong>already do</strong>. Just waiting for their
+        <code>terraform.tfvars</code> to be filled in:
+      </p>
+      <ul class="folder-list">
+        <li><code>terraform/environments/log-archive-account</code></li>
+        <li><code>terraform/environments/management</code></li>
+        <li><code>terraform/environments/audit-account</code></li>
+        <li><code>terraform/environments/network-hub-account</code></li>
+      </ul>
+      <p><strong>For your first landing zone</strong>, fill in the existing folders above directly (by hand, or via <a href="http://127.0.0.1:5000/">the Landing Zone UI</a>) — don't scaffold new ones for them. Apply in this order:</p>
+      <ol class="order-list">
+        <li>Log Archive Account</li>
+        <li>Management Account</li>
+        <li>Audit Account</li>
+        <li>Network Hub Account</li>
+        <li>Workload Account — <strong>the only step that needs this tool</strong> the first time through</li>
+      </ol>
+      <p>
+        <strong>Use this tool for the first four</strong> only when you need an
+        <em>additional</em> one beyond what already exists — a second client's
+        entire landing zone, a DR-region Network Hub, a second Audit account,
+        and so on.
+      </p>
+    </div>
+
+    <div class="cards">
+      {% for key, stack in stack_types.items() %}
+      <a class="card" href="{{ url_for('new_environment', stack_key=key) }}">
+        <div class="card-icon">{{ stack.icon | safe }}</div>
+        <h2><span class="step">{{ stack.step }}</span> {{ stack.title }}{% if stack.singleton %} <span class="badge">one only</span>{% endif %}</h2>
+        <p>{{ stack.description }}</p>
+        {% if stack.note %}<p class="note">{{ stack.note }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </main>
+</body>
+</html>

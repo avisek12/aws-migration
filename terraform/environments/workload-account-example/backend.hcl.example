@@ -1,0 +1,5 @@
+bucket         = "your-org-tfstate-workloads"
+key            = "landing-zone/ordermgmt-prod/terraform.tfstate" # change per app-environment copy
+region         = "us-east-1"
+dynamodb_table = "your-org-tfstate-locks"
+encrypt        = true

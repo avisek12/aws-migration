@@ -1,0 +1,3 @@
+aws_region        = "us-east-1"
+state_bucket_name = "acme-tfstate-management" # change per account: -management, -log-archive, -audit, -network-hub, -<app>-<env>
+lock_table_name   = "terraform-locks"

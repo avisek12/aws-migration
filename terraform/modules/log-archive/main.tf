@@ -88,6 +88,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     id     = "log-lifecycle"
     status = "Enabled"
 
+    filter {} # applies to every object in the bucket — required since AWS provider v5
+
     transition {
       days          = var.transition_to_ia_days
       storage_class = "STANDARD_IA"

@@ -1,0 +1,5 @@
+bucket         = "your-org-tfstate-management"
+key            = "landing-zone/management/terraform.tfstate"
+region         = "us-east-1"
+dynamodb_table = "your-org-tfstate-locks"
+encrypt        = true

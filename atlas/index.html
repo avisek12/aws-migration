@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Migration Atlas</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -171,6 +172,41 @@
   figcaption{ font-size:.83rem; color:var(--ink-muted); margin-top:10px; max-width:70ch; }
   svg text{ fill:currentColor; }
 
+  /* console walkthrough mockups — illustrative only, not real captured screenshots */
+  .console-disclaimer{ font-size:.82rem; color:var(--ink-muted); margin-bottom:20px; }
+  .console-frame{ border:1px solid var(--line-strong); border-radius:10px; overflow:hidden; box-shadow:var(--shadow); background:var(--surface); margin:16px 0 10px; }
+  .console-titlebar{ display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--surface-2); border-bottom:1px solid var(--line); }
+  .console-dots{ display:flex; gap:5px; flex:none; }
+  .console-dots span{ width:9px; height:9px; border-radius:50%; background:var(--line-strong); display:block; }
+  .console-url{ flex:1; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:4px 12px; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--ink-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .console-tag{ flex:none; font-size:.65rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-muted); border:1px solid var(--line-strong); border-radius:5px; padding:2px 6px; }
+  .console-body{ display:flex; min-height:200px; }
+  .console-side{ width:132px; flex:none; background:var(--surface-2); border-right:1px solid var(--line); padding:12px 8px; font-size:.76rem; }
+  .console-side .item{ padding:7px 8px; border-radius:6px; color:var(--ink-muted); margin-bottom:2px; }
+  .console-side .item.on{ background:var(--surface); color:var(--route); font-weight:600; box-shadow:var(--shadow); }
+  .console-main{ flex:1; min-width:0; padding:18px 20px; }
+  .console-main h5{ font-family:'Public Sans',sans-serif; font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-muted); font-weight:700; margin:0 0 12px; }
+  .console-highlight{ position:relative; outline:2px solid var(--route); outline-offset:3px; border-radius:7px; background:var(--route-soft); }
+  .badge-num{ position:absolute; top:-11px; left:-11px; width:22px; height:22px; border-radius:50%; background:var(--route); color:var(--route-contrast); font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:.72rem; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 3px var(--surface); z-index:2; }
+  .mock-field{ margin-bottom:12px; }
+  .mock-field label{ display:block; font-size:.74rem; color:var(--ink-muted); margin-bottom:4px; font-weight:600; }
+  .mock-input{ background:var(--surface); border:1px solid var(--line-strong); border-radius:6px; padding:7px 10px; font-size:.83rem; color:var(--ink); max-width:320px; }
+  .mock-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--line); border-radius:7px; background:var(--surface); margin-bottom:8px; font-size:.83rem; }
+  .mock-row .name{ font-weight:600; }
+  .mock-row .meta{ color:var(--ink-muted); font-size:.78rem; }
+  .mock-btn{ display:inline-flex; align-items:center; gap:6px; font-size:.8rem; font-weight:600; padding:7px 14px; border-radius:6px; border:1px solid transparent; }
+  .mock-btn.primary{ background:var(--flag); color:#fff; }
+  .mock-btn.secondary{ background:var(--surface); border-color:var(--line-strong); color:var(--ink); }
+  .mock-progress{ height:8px; border-radius:4px; background:var(--surface-2); overflow:hidden; border:1px solid var(--line); max-width:260px; }
+  .mock-progress > span{ display:block; height:100%; background:var(--route); }
+  .mock-badge-status{ display:inline-flex; align-items:center; gap:5px; font-size:.72rem; font-weight:700; padding:2px 9px; border-radius:999px; }
+  .mock-badge-status.ok{ background:var(--route-soft); color:var(--route); }
+  .mock-badge-status.pending{ background:var(--flag-soft); color:var(--flag); }
+  .console-caption{ font-size:.86rem; color:var(--ink-muted); margin:10px 0 24px; max-width:70ch; }
+  .console-caption strong{ color:var(--ink); }
+  .r-walk-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .r-walk-head .r-tool-pill{ font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--flag); font-weight:600; white-space:nowrap; }
+
   footer{ border-top:1px solid var(--line); padding-top:20px; color:var(--ink-muted); font-size:.82rem; }
 
   @media (max-width:900px){
@@ -197,6 +233,7 @@
       <li><a href="#landing-zone">HLD — landing zone</a></li>
       <li><a href="#factory">HLD — migration factory</a></li>
       <li><a href="#lld">LLD — strategy playbooks</a></li>
+      <li><a href="#console-walkthrough">Console walkthrough</a></li>
       <li><a href="#tooling">Tooling reference</a></li>
       <li><a href="#execution">Execution &amp; cutover</a></li>
       <li><a href="#governance">Governance &amp; RACI</a></li>
@@ -572,6 +609,442 @@
       </details>
     </section>
 
+    <section id="console-walkthrough">
+      <span class="sec-label">06B · Walkthrough</span>
+      <h2>AWS console walkthrough — one flagship example per disposition</h2>
+      <p class="lead">A concrete, end-to-end example of each of the 7 dispositions, step by step. These are hand-built illustrative mockups of the relevant console screens — not real captured screenshots — built to teach the workflow; the actual console layout will vary by region and over time, so verify against the live console when you execute for real.</p>
+      <p class="console-disclaimer">Every panel below is labeled <span class="console-tag">Illustrative</span> for this reason.</p>
+
+      <details class="lld">
+        <summary><span class="r-walk-head"><span>01 · Retire — decommission an idle EC2 workload</span><span class="r-tool-pill">Compute Optimizer → EC2</span></span></summary>
+        <div class="lld-body">
+          <p class="lead">Flagship: a reporting app instance with near-zero utilization for 30+ days, flagged by Compute Optimizer, taken through backup and safe teardown.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/compute-optimizer/home#/recommendations</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item on">EC2 instances</div><div class="item">Auto Scaling</div><div class="item">EBS volumes</div><div class="item">Lambda</div></div>
+              <div class="console-main">
+                <h5>Compute Optimizer › EC2 instance recommendations</h5>
+                <div class="console-highlight" style="padding:10px 12px;">
+                  <span class="badge-num">1</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">i-0a1b2c3d4e5f — legacy-reports-app</span><br><span class="meta">t3.large · CPU avg 2% over 30 days · Finding: Over-provisioned</span></div>
+                    <span class="mock-badge-status pending">Idle candidate</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>1. Spot the candidate.</strong> Compute Optimizer (or Cost Explorer's "unused resources" view) flags sustained near-zero utilization — the usual trigger for a Retire decision, confirmed with the app owner before touching anything.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/ec2/home?region=us-east-1#Instances</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item">Dashboard</div><div class="item on">Instances</div><div class="item">Elastic IPs</div><div class="item">Volumes</div></div>
+              <div class="console-main">
+                <h5>EC2 › Instances › i-0a1b2c3d4e5f</h5>
+                <div class="mock-field"><label>Instance state</label><span class="mock-badge-status ok">running</span></div>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">2</span><span class="mock-btn primary">Instance state ▾ Stop instance</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>2. Stop, don't terminate yet.</strong> Stopping first (not terminating) gives a reversible checkpoint while the objection window runs.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/ec2/home?region=us-east-1#CreateImage</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item">Instances</div><div class="item on">Images (AMIs)</div><div class="item">Snapshots</div></div>
+              <div class="console-main">
+                <h5>EC2 › Create image</h5>
+                <div class="mock-field"><label>Image name</label><div class="mock-input">legacy-reports-app-final-2026-09-12</div></div>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">3</span><span class="mock-btn primary">Create image</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>3. Take a final AMI.</strong> A dated backup that outlives the instance — cheap insurance if anyone asks for the data six months later.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/ec2/home?region=us-east-1#Instances</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item on">Instances</div><div class="item">Elastic IPs</div><div class="item">Volumes</div></div>
+              <div class="console-main">
+                <h5>EC2 › Clean up orphaned resources</h5>
+                <div class="mock-row"><div><span class="name">i-0a1b2c3d4e5f</span> <span class="meta">stopped</span></div><span class="console-highlight" style="padding:4px 10px;"><span class="badge-num">4</span><span class="mock-btn primary">Terminate</span></span></div>
+                <div class="mock-row"><div><span class="name">eipalloc-0f9e8d7c — unassociated</span></div><span class="mock-btn secondary">Release</span></div>
+                <div class="mock-row"><div><span class="name">vol-0b2c3d4e — 100 GiB, available</span></div><span class="mock-btn secondary">Delete volume</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>4. Terminate, then sweep orphans.</strong> Elastic IPs and detached EBS volumes keep billing after the instance is gone — release/delete them explicitly, then close the license/contract per docs/10's Retire checklist.</p>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary><span class="r-walk-head"><span>02 · Retain — record the decision so it doesn't go silent</span><span class="r-tool-pill">Migration Hub → Tagging</span></span></summary>
+        <div class="lld-body">
+          <p class="lead">Flagship: an app that's staying put for now — logged with a reason and a revisit date, not just quietly ignored.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/migrationhub/home#/applications</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item on">Applications</div><div class="item">Servers</div><div class="item">Databases</div></div>
+              <div class="console-main">
+                <h5>Migration Hub › Applications</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">1</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">payroll-mainframe-bridge</span><br><span class="meta">Owner: Finance Systems · Status: Not started</span></div>
+                    <span class="mock-btn secondary">Edit status</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>1. Select the application record.</strong> Every app in the portfolio gets a Migration Hub entry regardless of disposition — Retain is a status, not an absence of one.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/migrationhub/home#/applications/edit-status</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>Edit migration status</h5>
+                <div class="mock-field"><label>Status</label><div class="mock-input">Not migrating — Retain</div></div>
+                <div class="mock-field"><label>Reason</label><div class="mock-input">Recent ERP integration investment (2025) — revisit after amortization</div></div>
+                <div class="console-highlight" style="display:inline-block;"><span class="badge-num">2</span><div class="mock-field" style="margin:8px 12px;"><label>Revisit trigger date</label><div class="mock-input">2027-01-15</div></div></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>2. Set status + reason + revisit date together.</strong> A Retain without a revisit-trigger date is scope creep waiting to happen — docs/10 treats the trigger date as mandatory, not optional.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/resource-groups/tag-editor/find-resources</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>Tag Editor › Manage tags</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">3</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">disposition = retain</span> &nbsp; <span class="name">revisit-date = 2027-01-15</span></div>
+                    <span class="mock-btn primary">Apply tags</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>3. Tag the real AWS-side resources too</strong> (if any exist for it already), so cost/inventory reports surface the same decision Migration Hub has — one source of truth, not two.</p>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary><span class="r-walk-head"><span>03 · Relocate — bulk-move a VMware estate with HCX</span><span class="r-tool-pill">VMware Cloud on AWS</span></span></summary>
+        <div class="lld-body">
+          <p class="lead">Flagship: an entire VMware cluster moved to VMware Cloud on AWS at the hypervisor level — no guest OS changes.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">vmc.vmware.com/console/sddcs</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item on">SDDCs</div><div class="item">Add-ons</div><div class="item">Billing</div></div>
+              <div class="console-main">
+                <h5>VMware Cloud on AWS › SDDCs</h5>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">1</span><span class="mock-btn primary">+ Create SDDC</span></div>
+                <p style="font-size:.8rem; color:var(--ink-muted); margin-top:10px;">Deploys a dedicated vSphere/NSX/vSAN cluster on AWS bare-metal, in your chosen AWS Region and VPC.</p>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>1. Create the target SDDC.</strong> This is a real vSphere environment — the same tools and skills your VMware admins already have, running on AWS infrastructure.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">on-prem-vcenter.local/hcx/site-pairing</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>HCX › Site Pairing</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">2</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">on-prem-vcenter.local</span> ⇄ <span class="name">sddc-1.vmc.aws</span></div>
+                    <span class="mock-badge-status ok">Connected</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>2. Pair on-prem vCenter with the SDDC.</strong> HCX (installed on-prem as an appliance) establishes the encrypted, WAN-optimized link migrations travel over.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">on-prem-vcenter.local/hcx/migration/bulk</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>HCX › Bulk Migration</h5>
+                <div class="mock-row"><div><span class="name">☑ vm-order-svc-01</span></div><span class="meta">vMotion</span></div>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">3</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">☑ vm-order-svc-02 … vm-order-svc-24</span></div>
+                    <span class="mock-btn primary">Start migration</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>3. Select VMs and start the bulk job.</strong> HCX schedules and vMotions each VM with no reboot required, at whatever concurrency your WAN link supports.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">on-prem-vcenter.local/hcx/migration/status</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>HCX › Migration status</h5>
+                <div class="mock-field"><label>vm-order-svc-01 … 24 (24 of 24)</label><div class="mock-progress"><span style="width:100%"></span></div></div>
+                <span class="mock-badge-status ok">Migrated</span>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>4. Confirm completion in the same dashboard.</strong> No guest-OS changes were made — the fastest possible exit for a VMware-heavy estate.</p>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary><span class="r-walk-head"><span>04 · Rehost — lift &amp; shift an EC2 fleet with AWS MGN</span><span class="r-tool-pill">Application Migration Service</span></span></summary>
+        <div class="lld-body">
+          <p class="lead">Flagship: rehosting a fleet of application servers with the MGN replication agent, exactly as in docs/06.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/mgn/home#/sourceServers</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item on">Source servers</div><div class="item">Launch templates</div><div class="item">Job history</div></div>
+              <div class="console-main">
+                <h5>MGN › Source servers</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">1</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">orderapp-web-03</span><br><span class="meta">Replication: Healthy · Lag: 4s</span></div>
+                    <span class="mock-badge-status ok">Ready for testing</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>1. Watch replication reach "Healthy."</strong> The MGN agent does continuous block-level CDC — the source keeps serving production traffic the whole time.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/mgn/home#/launchSettings</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>MGN › orderapp-web-03 › Launch settings</h5>
+                <div class="mock-field"><label>Instance type</label><div class="mock-input">m6i.large (right-sized)</div></div>
+                <div class="console-highlight" style="display:inline-block;"><span class="badge-num">2</span><div class="mock-field" style="margin:8px 12px;"><label>Subnet / Security group</label><div class="mock-input">subnet-app-prod-1a / sg-app-tier</div></div></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>2. Configure launch settings.</strong> Target subnet, security group, instance type, IAM role, and encryption — set once per server, reused for every test/cutover launch.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/mgn/home#/sourceServers/test</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>MGN › orderapp-web-03</h5>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">3</span><span class="mock-btn primary">Test and Cutover ▾ Launch test instance</span></div>
+                <p style="font-size:.8rem; color:var(--ink-muted); margin-top:10px;">Launches into an isolated staging subnet — zero impact on production.</p>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>3. Launch a test instance.</strong> Functional and performance validation happen here, against the acceptance criteria the app owner signed off on.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/mgn/home#/sourceServers/cutover</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>MGN › orderapp-web-03</h5>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">4</span><span class="mock-btn primary">Test and Cutover ▾ Launch cutover instance</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>4. Cut over.</strong> Final sync, launch the production instance, re-point DNS/load balancer, smoke test — then bake 48–72h with the source still powered on as the rollback path.</p>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary><span class="r-walk-head"><span>05 · Replatform — move a database onto Amazon RDS with DMS</span><span class="r-tool-pill">DMS + SCT → RDS</span></span></summary>
+        <div class="lld-body">
+          <p class="lead">Flagship: replatforming a self-managed MySQL database onto Amazon RDS, exactly as in docs/07.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/rds/home#launch-instance</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>RDS › Create database</h5>
+                <div class="mock-field"><label>Engine</label><div class="mock-input">MySQL 8.0</div></div>
+                <div class="console-highlight" style="display:inline-block;"><span class="badge-num">1</span><div class="mock-field" style="margin:8px 12px;"><label>Deployment</label><div class="mock-input">Multi-AZ DB instance</div></div></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>1. Provision the target, right-sized and Multi-AZ.</strong> A run against the SCT compatibility assessment already confirmed there's nothing in the schema DMS/SCT can't handle.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/dms/v2/home#endpointList</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item">Replication instances</div><div class="item on">Endpoints</div><div class="item">Database migration tasks</div></div>
+              <div class="console-main">
+                <h5>DMS › Endpoints</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">2</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">source-onprem-mysql</span> → <span class="name">target-rds-mysql</span></div>
+                    <span class="mock-badge-status ok">Connection successful</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>2. Create and test source/target endpoints.</strong> "Connection successful" here means DMS can actually reach both databases before you build a task around it.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/dms/v2/home#taskList</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>DMS › Database migration tasks</h5>
+                <div class="mock-field"><label>Migration type</label><div class="mock-input">Migrate existing data and replicate ongoing changes</div></div>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">3</span><span class="mock-btn primary">Create task</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>3. Full load, then CDC.</strong> The target stays in sync with the live source for as long as the migration window needs to stay open.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/dms/v2/home#taskDetails</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>DMS › orders-db-migration › Table statistics</h5>
+                <div class="mock-field"><label>CDC latency (target)</label><div class="mock-progress"><span style="width:6%"></span></div><span class="meta">0.4s</span></div>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px; margin-top:8px;"><span class="badge-num">4</span><span class="mock-btn secondary">Row counts match: 24,118,004 / 24,118,004</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>4. Validate, then cut over.</strong> Confirmed row counts and near-zero CDC lag are the green light for a brief write-freeze, connection-string swap, and decommission of the source.</p>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary><span class="r-walk-head"><span>06 · Repurchase — move to SaaS with AppFlow + federated SSO</span><span class="r-tool-pill">Identity Center + AppFlow</span></span></summary>
+        <div class="lld-body">
+          <p class="lead">Flagship: replacing a homegrown CRM with a SaaS platform, exactly as in docs/08 — historical data migrated, SSO federated, not a spreadsheet export.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/singlesignon/identity/home#/applications</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-side"><div class="item">Users</div><div class="item">Groups</div><div class="item on">Applications</div></div>
+              <div class="console-main">
+                <h5>IAM Identity Center › Applications</h5>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">1</span><span class="mock-btn primary">+ Add application (SAML 2.0)</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>1. Add the SaaS app as a SAML application.</strong> One federated identity source instead of a second password to manage.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/singlesignon/identity/home#/applications/assign</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>Assign users and groups</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">2</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">Sales-Team</span> · <span class="name">CS-Team</span></div>
+                    <span class="mock-btn primary">Assign</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>2. Assign the groups that need it.</strong> Access follows existing group membership — no per-user manual provisioning in the new SaaS admin console.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/appflow/home#/create</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>AppFlow › Create flow</h5>
+                <div class="mock-field"><label>Source</label><div class="mock-input">Legacy CRM export (Amazon S3)</div></div>
+                <div class="console-highlight" style="display:inline-block;"><span class="badge-num">3</span><div class="mock-field" style="margin:8px 12px;"><label>Destination</label><div class="mock-input">Salesforce — Accounts, Contacts, Opportunities</div></div></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>3. Build the data migration flow.</strong> Field mapping resolved up front — gaps between the legacy schema and the SaaS data model get fixed before cutover, not during it.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/appflow/home#/details/crm-migration/runs</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>AppFlow › crm-migration › Run history</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">4</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">Run #12</span> <span class="meta">184,203 records</span></div>
+                    <span class="mock-badge-status ok">Succeeded</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>4. Confirm the run succeeded, reconcile counts.</strong> Run parallel with the legacy system for a defined period before freezing it — repurchase risk is adoption, not the data move.</p>
+        </div>
+      </details>
+
+      <details class="lld">
+        <summary><span class="r-walk-head"><span>07 · Refactor — strangle a monolith capability onto ECS Fargate</span><span class="r-tool-pill">ECS Fargate + ALB</span></span></summary>
+        <div class="lld-body">
+          <p class="lead">Flagship: extracting one bounded context from a monolith behind a routing facade, exactly as in docs/09 — one capability at a time, never a rewrite.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/ecs/home#/clusters/create</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>ECS › Create cluster</h5>
+                <div class="mock-field"><label>Infrastructure</label><div class="mock-input">AWS Fargate (serverless)</div></div>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">1</span><span class="mock-btn primary">Create</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>1. Create a Fargate cluster.</strong> No servers to patch or size — capacity follows the extracted service's actual load.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/ecs/home#/taskDefinitions/create</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>ECS › Task definition › pricing-service</h5>
+                <div class="mock-field"><label>Container image</label><div class="mock-input">123456789012.dkr.ecr.us-east-1.amazonaws.com/pricing-service:1.0</div></div>
+                <div class="console-highlight" style="display:inline-block; padding:8px 12px;"><span class="badge-num">2</span><span class="mock-btn primary">Create service</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>2. Register the task definition, create the service.</strong> The extracted "pricing" capability now runs as its own deployable unit with its own datastore.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/ec2/home#LoadBalancer:listeners</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>EC2 › Load Balancers › monolith-alb › Listener rules</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">3</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">IF path = /api/pricing/*</span> → <span class="name">forward to tg-pricing-service</span></div>
+                    <span class="mock-btn primary">Add rule</span>
+                  </div>
+                </div>
+                <div class="mock-row"><div><span class="name">ELSE</span> → <span class="meta">forward to tg-monolith (default, unchanged)</span></div></div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>3. Route one path to the new service.</strong> The routing facade — everything else still goes to the monolith untouched, which is what makes this safe to do incrementally.</p>
+
+          <div class="console-frame">
+            <div class="console-titlebar"><div class="console-dots"><span></span><span></span><span></span></div><div class="console-url">console.aws.amazon.com/cloudwatch/home#dashboards/pricing-service</div><div class="console-tag">Illustrative</div></div>
+            <div class="console-body">
+              <div class="console-main" style="width:100%;">
+                <h5>CloudWatch › Dashboard › pricing-service</h5>
+                <div class="console-highlight" style="padding:10px 12px;"><span class="badge-num">4</span>
+                  <div class="mock-row" style="border:none; margin:0; padding:0; background:transparent;">
+                    <div><span class="name">5xx rate</span> <span class="meta">0.01% · p99 latency 84ms</span></div>
+                    <span class="mock-badge-status ok">Healthy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="console-caption"><strong>4. Watch it in production, then repeat.</strong> Once the extracted service is proven healthy under real traffic, pick the next bounded context and do it again — the monolith shrinks one capability at a time.</p>
+        </div>
+      </details>
+    </section>
+
     <section id="tooling">
       <span class="sec-label">07 · Tooling</span>
       <h2>Tooling reference</h2>
@@ -840,3 +1313,5 @@
   })();
 })();
 </script>
+
+</body></html>

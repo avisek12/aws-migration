@@ -44,7 +44,7 @@ terraform/
 | 6 | `workload-vpc` — `onprem_cidrs` (data-tier route to on-prem) | **Optional**, default `[]` | Data tier is fully isolated unless you explicitly need it to reach something on-prem (e.g. central AD, backup target). |
 | 7 | `iam-identity-center` — permission sets | **Mandatory** (some form of SSO access is needed), but the *specific* three default permission sets are a **customizable starting point**, not a fixed requirement | You'll always need at least one permission set; which ones and what they grant is yours to define. |
 | 7 | `iam-identity-center` — account assignments (mapping permission sets to accounts/users) | **Not implemented — required follow-up**, not truly optional | Without `aws_ssoadmin_account_assignment` resources, the permission sets exist but grant access to no one. |
-| — | Manual bootstrap steps (Terraform state backend, Identity Center console "Enable", TGW RAM-share acceptance) | **Mandatory, one-time, by hand** | Not Terraform-managed by design — see §10. |
+| — | Manual bootstrap steps (state backend via `bootstrap-backend/`, Identity Center console "Enable", TGW RAM-share acceptance) | **Mandatory, one-time, by hand** | The state backend *is* Terraform-managed (via `bootstrap-backend/`) but still needs a deliberate first run per account; Identity Center's console toggle and RAM-share acceptance have no Terraform equivalent at all — see §10. |
 | — | TGW route-table segmentation (single shared route table today) | **Works as shipped, but a required upgrade before real prod/non-prod isolation** | See the segmentation caveat under module 5 and README §"Extending toward prod/non-prod route isolation". |
 
 ---
@@ -327,7 +327,7 @@ These are starting points, not a complete set — there's no admin/break-glass p
 
 ## 8. `environments/*` — how the modules get composed
 
-Each environment folder is a separate Terraform state / AWS account. All five follow the same three-file shape: `providers.tf` (pins `hashicorp/aws ~> 5.0`, sets `region = var.aws_region`), `backend.tf` (a **commented-out** S3+DynamoDB backend block — intentionally inert until you bootstrap that bucket/table by hand, since Terraform can't create the backend it's about to store its own state in), `variables.tf`, `main.tf`, and (except `management`) `outputs.tf`.
+Each environment folder is a separate Terraform state / AWS account. All five follow the same three-file shape: `providers.tf` (pins `hashicorp/aws ~> 5.0`, sets `region = var.aws_region`), `backend.tf` (a **commented-out** S3+DynamoDB backend block — intentionally inert, defaulting to local state, until you bootstrap that bucket/table with [`../bootstrap-backend/`](../bootstrap-backend/) and point a `backend.hcl` at it — see that backend.tf's own comment and `backend.hcl.example` in each directory), `variables.tf`, `main.tf`, and (except `management`) `outputs.tf`.
 
 ### `environments/management`
 Composes `org_foundation` + `security_baseline` (with the dual-provider wiring described in module 5 above) + `identity_center`, and additionally owns the **org CloudTrail trail** directly (not wrapped in a module):
@@ -354,6 +354,8 @@ provider "aws" {
 
 ### `environments/log-archive-account`
 Composes `log_archive` + `account_baseline`, feeding the just-created bucket/key straight into its own baseline (`module.account_baseline.log_archive_bucket_name = module.log_archive.bucket_name`) — this account bootstraps itself and needs no cross-stack input. **Apply this one first** (see README deployment order) since every other stack needs its bucket/key outputs.
+
+**A dependency that has to be explicit, not implied by variables:** `module.account_baseline` declares `depends_on = [module.log_archive]`. Without it, Terraform's graph only ties `account_baseline` to `log_archive`'s **bucket** (via the `bucket_name`/`kms_key_arn` outputs it consumes) — not to the separate `aws_s3_bucket_policy.logs` resource that actually grants AWS Config permission to write there. That policy and `account_baseline`'s `aws_config_delivery_channel` are otherwise sibling resources with no ordering guarantee between them, so Terraform can create the delivery channel before the policy is attached — and Config's delivery channel creation does a live write-access check, which then fails with an access-denied-style error. This is a **real race condition this codebase hit** (confirmed via `terraform graph`, then via a live apply that failed at exactly this step) — the `depends_on` forces the entire `log_archive` module to finish before `account_baseline` starts, closing it. This is only needed in *this* environment: everywhere else, `log_archive_bucket_name`/`kms_key_arn` arrive as plain variables from an already-applied stack, so the bucket and its policy already exist by the time `account_baseline` runs.
 
 ### `environments/audit-account`
 Just `account_baseline` — its GuardDuty/Security Hub setup is entirely remote-controlled from `environments/management`'s `security_baseline` module (delegated administration), so there's nothing security-specific to declare locally; the file's own comment says as much.
@@ -386,8 +388,8 @@ A security finding surfacing:
 
 ## 10. Things to know before you run this for real
 
-- **Nothing here has been `terraform init`/`plan`/`apply`-tested against live AWS** — this is reference architecture code matching the HLD, meant to be reviewed, adapted to your naming/CIDR/account-id conventions, and validated in a sandbox OU before touching Security/Infrastructure or production workload accounts.
-- **Bootstrap order matters and is manual in three places:** the S3+DynamoDB backend per account (`backend.tf` comments), Identity Center's console "Enable" click, and each workload account's TGW RAM-share acceptance.
+- **`terraform validate` passes on all five environments, and `log-archive-account` has been through a real `apply`/`destroy` cycle against live AWS** (which is how the `depends_on` race condition above was found and fixed) — but that's still a long way from "battle-tested." Review and adapt naming/CIDR/account-id conventions to your own org, and validate in a sandbox OU before touching Security/Infrastructure or production workload accounts.
+- **Bootstrap order matters and is manual in three places:** each account's S3+DynamoDB state backend (apply [`../bootstrap-backend/`](../bootstrap-backend/) once per account, then point that environment's `backend.hcl` at it — see its `backend.tf` comment), Identity Center's console "Enable" click, and each workload account's TGW RAM-share acceptance.
 - **The org CloudTrail trail and the log-archive bucket are in different stacks/accounts** — you must apply `log-archive-account` first and hand-copy its `bucket_name`/`kms_key_arn` outputs into `management`'s `terraform.tfvars` (or wire up `terraform_remote_state`, which isn't set up here).
 - **The Transit Gateway route table is unsegmented by default** — treat "flip to per-segment route tables" as a required follow-up before this goes to production with a real prod/non-prod boundary, not an optional nice-to-have (see README §"Extending toward prod/non-prod route isolation").
 - **No account assignments exist yet** for the Identity Center permission sets (`iam-identity-center` builds the permission sets but never maps them to accounts/users/groups via `aws_ssoadmin_account_assignment`) — that's the natural next module to add.

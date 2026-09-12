@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Landing Zone UI{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>AWS Landing Zone</h1>
+  <p class="subtitle">Fill in the fields, review a real <code>terraform plan</code>, then click Apply — no command line required.</p>
+</div>
+
+<div class="stepper">
+  <div class="step-item"><div class="circle">1</div><div class="label">Log Archive</div></div>
+  <div class="step-item"><div class="circle">2</div><div class="label">Management</div></div>
+  <div class="step-item"><div class="circle">3</div><div class="label">Audit</div></div>
+  <div class="step-item"><div class="circle">4</div><div class="label">Network Hub</div></div>
+  <div class="step-item workload"><div class="circle">5</div><div class="label">Workload (per app)</div></div>
+</div>
+
+<div class="cards">
+  {% for key, env in environments.items() %}
+  <a class="card" href="{{ url_for('environment_page', env_key=key) }}">
+    <div class="card-icon">{{ env.icon | safe }}</div>
+    <h2>{{ loop.index }}. {{ env.title }}</h2>
+    <p>{{ env.description }}</p>
+  </a>
+  {% endfor %}
+
+  <a class="card" href="{{ url_for('workload_page') }}">
+    <div class="card-icon">{{ workload.icon | safe }}</div>
+    <h2>5. {{ workload.title }}</h2>
+    <p>{{ workload.description }}</p>
+  </a>
+</div>
+
+{% if existing_workloads %}
+<h2>Existing workload accounts</h2>
+<ul>
+  {% for name in existing_workloads %}
+  <li>
+    <a href="{{ url_for('workload_page') }}?app_name={{ name.rsplit('-', 1)[0] }}&environment={{ name.rsplit('-', 1)[1] }}">
+      {{ name }}
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

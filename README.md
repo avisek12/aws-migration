@@ -22,6 +22,7 @@ Read in this order if you're building a migration practice from scratch:
 9. [RACI & Governance Model](docs/13-raci-governance.md) — who owns what, and how decisions get made.
 10. [Risk Management & Cost Optimization](docs/14-risk-cost-optimization.md) — the risk register and FinOps motion post-migration.
 11. [Terraform Code Walkthrough](docs/15-terraform-code-walkthrough.md) — resource-by-resource explanation of every file in [`terraform/`](terraform/), for when you need to explain, modify, or debug the landing zone code itself.
+12. [Learning Resources](docs/16-learning-resources.md) — a prioritized reading/training list for building real AWS migration depth beyond this repo.
 
 Reusable templates (copy per wave/app) live in [`templates/`](templates/); architecture diagrams live in [`diagrams/`](diagrams/); a single-page navigable version of this whole playbook with an interactive execution checklist lives in [`atlas/`](atlas/) ([live version](https://claude.ai/code/artifact/5bbc80cf-53e3-41e1-84a6-02547984e138)).
 
