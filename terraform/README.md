@@ -2,6 +2,8 @@
 
 Implements the account, network, logging, and security foundation from [`docs/04-hld-landing-zone.md`](../docs/04-hld-landing-zone.md). Every migrated workload (docs/06–10's LLDs) lands into an account built from the `workload-vpc` module here.
 
+For a resource-by-resource explanation of everything in this folder — what each module builds, why each decision was made, and how the environments compose them — see [`docs/15-terraform-code-walkthrough.md`](../docs/15-terraform-code-walkthrough.md).
+
 **Scope note:** this does *not* stand up AWS Control Tower itself — Control Tower's account factory and guardrail packaging are a console/CloudFormation-managed product, not something to hand-roll in Terraform (if you want Control Tower, enable it via the console first, then this code manages everything docs/04 §4 calls "anything Control Tower doesn't manage"). If you're **not** using Control Tower, the `org-foundation` module is a complete, lighter-weight standalone alternative: Organizations + OUs + SCPs, no Control Tower required.
 
 ## Layout
