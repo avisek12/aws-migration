@@ -1,0 +1,12 @@
+Flask>=3.0,<4.0
+openai>=1.0
+requests>=2.31,<3.0
+
+# openai's transport (httpx2) decodes Brotli-compressed responses via the
+# Brotli package's Decompressor.process(data, output_buffer_limit=...) —
+# that keyword argument only exists in Brotli 1.1.0+. An older Brotli
+# raises a plain TypeError on the first real (compressed) API response,
+# which openai then reports as a misleading APIConnectionError — see
+# README's troubleshooting note. Pinned explicitly so a fresh install
+# can't silently reintroduce this.
+Brotli>=1.1.0

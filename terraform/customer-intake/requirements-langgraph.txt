@@ -1,0 +1,15 @@
+Flask>=3.0,<4.0
+langchain-core
+langchain-openai
+langgraph
+requests>=2.31,<3.0
+
+# langchain-openai depends on openai, whose transport (httpx2) decodes
+# Brotli-compressed responses via Brotli's Decompressor.process(data,
+# output_buffer_limit=...) — that keyword argument only exists in
+# Brotli 1.1.0+. An older Brotli raises a plain TypeError on the first
+# real (compressed) API response, surfaced as a misleading
+# openai.APIConnectionError — see ./README.md's troubleshooting note
+# (hit and fixed for real on this exact project). Pinned explicitly so a
+# fresh install can't reintroduce it.
+Brotli>=1.1.0

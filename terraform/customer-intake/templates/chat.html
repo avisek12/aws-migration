@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Landing Zone Intake</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <span class="brand">Landing Zone Intake</span>
+    <span class="info">Generates a downloadable Terraform folder — never touches AWS, never writes to GitHub</span>
+  </header>
+  <main>
+    <div class="hero">
+      <h1>Tell us what you need</h1>
+      <p class="subtitle">Describe the AWS account/environment you're setting up in plain language — no Terraform or AWS experience needed. We'll ask for the details as we go, then hand you a ready-to-run code folder.</p>
+    </div>
+
+    <div class="chat-panel">
+      <div id="messages" class="messages">
+        <div class="msg assistant">Hi! What kind of AWS environment are you setting up — a logging account, a management/organization account, a security audit account, a network hub, or a specific application?</div>
+      </div>
+
+      <div id="download-bar" class="download-bar" hidden>
+        <span>Your code is ready.</span>
+        <a id="download-link" class="mock-btn primary" href="/api/download">Download .zip</a>
+      </div>
+
+      <form id="chat-form" class="chat-form">
+        <input type="text" id="chat-input" placeholder="Type your answer…" autocomplete="off" required>
+        <button type="submit" id="send-btn"><span class="spinner"></span><span class="btn-label">Send</span></button>
+      </form>
+    </div>
+
+    <p class="disclaimer">This assistant only collects information and generates code for you to review and run yourself with <code>terraform init / plan / apply</code>. It never deploys anything and never has write access to any repository.</p>
+  </main>
+
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const downloadBar = document.getElementById('download-bar');
+
+    function addMessage(text, who) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + who;
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+      sendBtn.disabled = true;
+      sendBtn.classList.add('loading');
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text }),
+        });
+        const data = await res.json();
+        addMessage(data.reply || '(no response)', 'assistant');
+        if (data.ready) {
+          downloadBar.hidden = false;
+        }
+      } catch (err) {
+        addMessage('Something went wrong reaching the server. Please try again.', 'assistant');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('loading');
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
